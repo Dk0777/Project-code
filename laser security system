@@ -1,0 +1,22 @@
+Source Code for Laser Security System:
+// Define laser sensor pin
+const int laserPin = 2; // Example pin 2, change according to your setup
+// Define buzzer pin
+const int buzzerPin = 3; // Example pin 3, change according to your setup
+void setup() {
+ // Initialize the laser sensor pin as input
+ pinMode(laserPin, INPUT);
+ // Initialize the buzzer pin as output
+ pinMode(buzzerPin, OUTPUT);
+}
+void loop() {
+ // Read the state of the laser sensor
+ int laserState = digitalRead(laserPin);
+ // Check if the laser beam is interrupted
+ if (laserState == LOW) {
+ // If laser beam is interrupted, activate the buzzer
+ digitalWrite(buzzerPin, HIGH);
+ delay(1000); // Buzz for 1 second
+ digitalWrite(buzzerPin, LOW); // Turn off the buzzer
+ }
+}
