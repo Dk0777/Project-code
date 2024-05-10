@@ -1,0 +1,47 @@
+Source Code For Smart Irrigation System:
+#include <SPI.h>
+#include <Wire.h>
+#include <DHT.h>
+#include <RF24.h>
+#define DHTPIN 2 // DHT11 data pin connected to Arduino pin 2
+#define DHTTYPE DHT11 // DHT11 sensor type
+const int moisturePin = A0; // Moisture sensor analog pin
+const int CE_PIN = 9; // NRF24L01 CE pin
+const int CSN_PIN = 10; // NRF24L01 CSN pin
+RF24 radio(CE_PIN, CSN_PIN); // NRF24L01 radio object
+DHT dht(DHTPIN, DHTTYPE); // DHT sensor object
+void setup() {
+ Serial.begin(9600);
+ pinMode(moisturePin, INPUT);
+ dht.begin();
+radio.begin();
+ radio.openWritingPipe(0xF0F0F0F0E1LL); // Set the address for the wireless communication
+ radio.setPALevel(RF24_PA_LOW); // Set power level to low
+ radio.stopListening(); // Set to transmit mode
+void loop() {
+ float humidity = dht.readHumidity();
+ float temperature = dht.readTemperature();
+ int moisture = analogRead(moisturePin);
+ if (isnan(humidity) || isnan(temperature)) {
+ Serial.println("Failed to read from DHT sensor!");
+ return;
+ }
+ Serial.print("Humidity: ");
+ Serial.print(humidity);
+ Serial.print("%, Temperature: ");
+ Serial.print(temperature);
+ Serial.println("°C");
+ Serial.print("Moisture Level: ");
+ Serial.println(map(moisture, 0, 1023, 0, 100)); // Map analog value to percentage
+ // Data packet to be sent
+ String dataPacket = String(humidity) + "," + String(temperature) + "," + String(map(moisture, 
+0, 1023, 0, 100));
+ 
+ // Convert String to char array
+ char payload[32];
+ dataPacket.toCharArray(payload, 32);
+ // Send data packet wirelessly
+radio.write(&payload, sizeof(payload));
+ 
+ delay(1000); // Delay before sending next reading
+}
